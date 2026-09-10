@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Апта трекері</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F1ECDD;
+    --surface:#FBF9F1;
+    --ink:#2A2520;
+    --ink-soft:#8A8071;
+    --accent:#48604A;
+    --accent-2:#A8703C;
+    --line:#DBD1B7;
+    --danger:#A23E3E;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;background:transparent;color:var(--ink);}
+  body{
+    font-family:'Inter',sans-serif;
+    font-size:15px;
+    padding:22px 18px 44px;
+    max-width:640px;
+    margin:0 auto;
+  }
+  .week-nav{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:16px;
+    padding-bottom:16px;
+    margin-bottom:20px;
+    border-bottom:2px solid var(--ink);
+  }
+  .week-nav button{
+    background:none;
+    border:none;
+    font-family:'Inter',sans-serif;
+    font-size:15px;
+    color:var(--ink-soft);
+    cursor:pointer;
+    padding:4px 6px;
+  }
+  .week-nav button:hover{color:var(--ink);}
+  .week-nav .range{
+    font-family:'Source Serif 4',serif;
+    font-weight:600;
+    font-size:17px;
+    color:var(--ink);
+  }
+
+  .day-strip{
+    display:flex;
+    justify-content:space-between;
+    gap:6px;
+    padding-bottom:16px;
+    margin-bottom:6px;
+  }
+  .day-pill{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:2px;
+    padding:7px 0;
+    border:1px solid var(--line);
+    border-radius:6px;
+    background:var(--surface);
+    cursor:pointer;
+    font-family:'Inter',sans-serif;
+  }
+  .day-pill .dn{ font-size:11px; color:var(--ink-soft); }
+  .day-pill .dd{ font-size:14px; font-weight:600; color:var(--ink); }
+  .day-pill.today{ border-color:var(--accent-2); }
+  .day-pill.selected{ background:var(--accent); border-color:var(--accent); }
+  .day-pill.selected .dn, .day-pill.selected .dd{ color:#fff; }
+
+  .row{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding:14px 0;
+    border-bottom:1px solid var(--line);
+  }
+  .row:last-child{border-bottom:none;}
+  .row-label{
+    flex:0 0 118px;
+    font-weight:600;
+    font-size:14px;
+  }
+  .row-mid{
+    flex:1;
+    min-width:0;
+  }
+  .row-bar{
+    height:7px;
+    background:var(--line);
+    border-radius:4px;
+    overflow:hidden;
+  }
+  .row-fill{
+    height:100%;
+    background:var(--accent-2);
+    border-radius:4px;
+    transition:width .3s ease;
+  }
+  .row-fill.done{background:var(--accent);}
+  .row-count{
+    font-size:12px;
+    color:var(--ink-soft);
+    margin-top:5px;
+  }
+  .row-ctrl{
+    flex:0 0 auto;
+    display:flex;
+    align-items:center;
+    gap:6px;
+  }
+  .num-input{
+    width:56px;
+    padding:6px 7px;
+    border:1px solid var(--line);
+    border-radius:4px;
+    font-family:'Inter',sans-serif;
+    font-size:14px;
+    text-align:center;
+    background:var(--surface);
+    color:var(--ink);
+  }
+  .num-input:focus{outline:2px solid var(--accent); outline-offset:1px;}
+  .step-btn{
+    width:26px;
+    height:26px;
+    border:1px solid var(--line);
+    border-radius:4px;
+    background:var(--surface);
+    font-size:15px;
+    line-height:1;
+    color:var(--ink);
+    cursor:pointer;
+  }
+  .step-btn:hover{border-color:var(--ink);}
+  .step-val{
+    min-width:16px;
+    text-align:center;
+    font-weight:600;
+    font-size:14px;
+  }
+
+  .bottom{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-top:26px;
+  }
+  .copy-btn{
+    background:var(--accent);
+    color:#fff;
+    border:none;
+    border-radius:4px;
+    padding:8px 16px;
+    font-family:'Inter',sans-serif;
+    font-size:13.5px;
+    font-weight:600;
+    cursor:pointer;
+  }
+  .copy-btn:hover{background:#3a4d3c;}
+  .copy-msg{
+    font-size:12.5px;
+    color:var(--accent);
+    opacity:0;
+    transition:opacity .3s;
+  }
+  .copy-msg.show{opacity:1;}
+  .reset-link{
+    background:none;
+    border:none;
+    color:var(--ink-soft);
+    font-size:12px;
+    text-decoration:underline;
+    text-underline-offset:2px;
+    cursor:pointer;
+    padding:0;
+  }
+  .reset-link:hover{color:var(--danger);}
+
+  .report-box{
+    width:100%;
+    margin-top:14px;
+    padding:14px;
+    border:1px solid var(--line);
+    border-radius:6px;
+    background:var(--surface);
+    font-family:'Inter',sans-serif;
+    font-size:13.5px;
+    line-height:1.7;
+    white-space:pre-wrap;
+    color:var(--ink);
+    display:none;
+  }
+  .report-box.show{display:block;}
+
+  .loading{color:var(--ink-soft); font-size:14px; padding:20px 0;}
+</style>
+</head>
+<body>
+
+<div class="week-nav">
+  <button id="prevWeek">‹</button>
+  <span class="range" id="rangeLabel"></span>
+  <button id="nextWeek">›</button>
+</div>
+
+<div id="app"><div class="loading">Жүктелуде…</div></div>
+<div class="report-box" id="reportBox"></div>
+
+<div class="bottom">
+  <button class="reset-link" id="resetBtn">тазарту</button>
+  <div style="display:flex;align-items:center;gap:10px;">
+    <span class="copy-msg" id="copyMsg">көшірілді</span>
+    <button class="copy-btn" id="copyBtn">Есеп</button>
+  </div>
+</div>
+
+<script>
+(function(){
+  const KAZ_MONTHS = ['қаңтар','ақпан','наурыз','сәуір','мамыр','маусым','шілде','тамыз','қыркүйек','қазан','қараша','желтоқсан'];
+  const FIELDS = [
+    {key:'kz', label:'Қазақша кітап', unit:'бет', target:50, type:'number'},
+    {key:'ru', label:'Орысша кітап', unit:'бет', target:30, type:'number'},
+    {key:'en', label:'Ағылшын кітап', unit:'бет', target:20, type:'number'},
+    {key:'workout', label:'Түнгі жаттығу', unit:'рет', target:2, type:'stepper'},
+    {key:'diet', label:'Диета', unit:'рет', target:1, type:'stepper'},
+    {key:'podcast', label:'Подкаст', unit:'мин', target:60, type:'number'},
+  ];
+
+  const KAZ_DAYS = ['Дс','Сс','Ср','Бс','Жм','Сб','Жс'];
+  let log = {}; // { 'YYYY-MM-DD': {kz,ru,en,workout,diet,podcast} }
+  let viewedMonday = mondayOf(new Date());
+  let selectedDate = new Date();
+  let ready = false;
+
+  const appEl = document.getElementById('app');
+
+  function fmtDate(d){
+    const y=d.getFullYear(), m=String(d.getMonth()+1).padStart(2,'0'), day=String(d.getDate()).padStart(2,'0');
+    return `${y}-${m}-${day}`;
+  }
+  function mondayOf(d){
+    const date = new Date(d);
+    date.setHours(0,0,0,0);
+    const day = date.getDay();
+    date.setDate(date.getDate() + (day===0 ? -6 : 1-day));
+    return date;
+  }
+  function addDays(d,n){ const r=new Date(d); r.setDate(r.getDate()+n); return r; }
+  function shortDayMonth(d){ return `${d.getDate()} ${KAZ_MONTHS[d.getMonth()]}`; }
+  function dayEntry(dateStr){
+    return log[dateStr] || {kz:0,ru:0,en:0,workout:0,diet:0,podcast:0};
+  }
+
+  async function loadData(){
+    try{
+      const r = await window.storage.get('log', false);
+      log = r && r.value ? JSON.parse(r.value) : {};
+    }catch(e){ log = {}; }
+    ready = true;
+  }
+  async function saveData(){
+    try{ await window.storage.set('log', JSON.stringify(log), false); }
+    catch(e){ console.error('save failed', e); }
+  }
+
+  async function setField(dateStr, key, value){
+    const entry = dayEntry(dateStr);
+    entry[key] = value;
+    log[dateStr] = entry;
+    await saveData();
+  }
+
+  function weekDates(monday){ return Array.from({length:7}, (_,i)=>addDays(monday,i)); }
+
+  function weekTotal(monday, key){
+    return weekDates(monday).reduce((s,d)=>s + (dayEntry(fmtDate(d))[key]||0), 0);
+  }
+
+  function render(){
+    if(!ready) return;
+    const todayStr = fmtDate(new Date());
+    const dates = weekDates(viewedMonday);
+    const selStr = fmtDate(selectedDate);
+    document.getElementById('rangeLabel').textContent =
+      `${shortDayMonth(dates[0])} – ${shortDayMonth(dates[6])}`;
+
+    let html = '<div class="day-strip">';
+    dates.forEach((d,i)=>{
+      const dStr = fmtDate(d);
+      const cls = ['day-pill'];
+      if(dStr===todayStr) cls.push('today');
+      if(dStr===selStr) cls.push('selected');
+      html += `<div class="${cls.join(' ')}" data-pick="${dStr}">
+        <span class="dn">${KAZ_DAYS[i]}</span><span class="dd">${d.getDate()}</span>
+      </div>`;
+    });
+    html += '</div>';
+
+    FIELDS.forEach(f=>{
+      const total = weekTotal(viewedMonday, f.key);
+      const pct = Math.min(100, Math.round((total/f.target)*100));
+      const selVal = dayEntry(selStr)[f.key] || 0;
+      html += `<div class="row">
+        <div class="row-label">${f.label}</div>
+        <div class="row-mid">
+          <div class="row-bar"><div class="row-fill ${pct>=100?'done':''}" style="width:${pct}%"></div></div>
+          <div class="row-count">${total}/${f.target} ${f.unit}</div>
+        </div>
+        <div class="row-ctrl">`;
+      if(f.type==='number'){
+        html += `<input type="number" min="0" class="num-input" data-key="${f.key}" value="${selVal || ''}" placeholder="0">`;
+      } else {
+        html += `<button class="step-btn" data-dec="${f.key}">−</button>
+          <span class="step-val">${selVal}</span>
+          <button class="step-btn" data-inc="${f.key}">+</button>`;
+      }
+      html += `</div></div>`;
+    });
+
+    appEl.innerHTML = html;
+    attachHandlers(selStr);
+  }
+
+  function attachHandlers(selStr){
+    appEl.querySelectorAll('[data-pick]').forEach(pill=>{
+      pill.addEventListener('click', ()=>{
+        const [y,m,d] = pill.getAttribute('data-pick').split('-').map(Number);
+        selectedDate = new Date(y, m-1, d);
+        render();
+      });
+    });
+    appEl.querySelectorAll('.num-input').forEach(inp=>{
+      inp.addEventListener('change', async ()=>{
+        const val = Math.max(0, Number(inp.value) || 0);
+        await setField(selStr, inp.getAttribute('data-key'), val);
+        render();
+      });
+    });
+    appEl.querySelectorAll('[data-inc]').forEach(btn=>{
+      btn.addEventListener('click', async ()=>{
+        const key = btn.getAttribute('data-inc');
+        const cur = dayEntry(selStr)[key] || 0;
+        await setField(selStr, key, cur+1);
+        render();
+      });
+    });
+    appEl.querySelectorAll('[data-dec]').forEach(btn=>{
+      btn.addEventListener('click', async ()=>{
+        const key = btn.getAttribute('data-dec');
+        const cur = dayEntry(selStr)[key] || 0;
+        await setField(selStr, key, Math.max(0, cur-1));
+        render();
+      });
+    });
+  }
+
+  function buildReport(){
+    const dates = weekDates(viewedMonday);
+    const rangeLabel = `${shortDayMonth(dates[0])} – ${shortDayMonth(dates[6])}, ${dates[6].getFullYear()}`;
+    const lines = [rangeLabel, ''];
+    FIELDS.forEach(f=>{
+      const total = weekTotal(viewedMonday, f.key);
+      const mark = total >= f.target ? '✓' : '✗';
+      lines.push(`${mark} ${f.label}: ${total}/${f.target} ${f.unit}`);
+    });
+    return lines.join('\n');
+  }
+
+  function goToWeek(newMonday){
+    viewedMonday = newMonday;
+    const today = new Date();
+    selectedDate = (fmtDate(mondayOf(today))===fmtDate(newMonday)) ? today : new Date(newMonday);
+    document.getElementById('reportBox').classList.remove('show');
+    render();
+  }
+  document.getElementById('prevWeek').addEventListener('click', ()=> goToWeek(addDays(viewedMonday,-7)));
+  document.getElementById('nextWeek').addEventListener('click', ()=> goToWeek(addDays(viewedMonday,7)));
+
+  document.getElementById('copyBtn').addEventListener('click', async ()=>{
+    const text = buildReport();
+    const box = document.getElementById('reportBox');
+    box.textContent = text;
+    box.classList.add('show');
+    try{ await navigator.clipboard.writeText(text); }
+    catch(e){
+      const ta = document.createElement('textarea');
+      ta.value = text; document.body.appendChild(ta); ta.select();
+      document.execCommand('copy'); document.body.removeChild(ta);
+    }
+    const msg = document.getElementById('copyMsg');
+    msg.classList.add('show');
+    setTimeout(()=>msg.classList.remove('show'), 1600);
+  });
+
+  document.getElementById('resetBtn').addEventListener('click', async ()=>{
+    if(!confirm('Барлық деректер өшіріледі. Жалғастыру керек пе?')) return;
+    log = {};
+    await saveData();
+    render();
+  });
+
+  (async ()=>{
+    await loadData();
+    render();
+  })();
+})();
+</script>
+
+</body>
+</html>
